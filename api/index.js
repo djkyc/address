@@ -1,34 +1,19 @@
-// ================== 数据区 ==================
+// ================== 数据 ==================
 
-// 国家坐标数据
 const countryCoordinates = {
   US: [{ lat: 37.7749, lng: -122.4194 }, { lat: 34.0522, lng: -118.2437 }],
-  UK: [{ lat: 51.5074, lng: -0.1278 }, { lat: 53.4808, lng: -2.2426 }],
-  FR: [{ lat: 48.8566, lng: 2.3522 }, { lat: 45.764, lng: 4.8357 }],
-  DE: [{ lat: 52.52, lng: 13.405 }, { lat: 48.1351, lng: 11.582 }],
-  CN: [
-    { lat: 39.9042, lng: 116.4074 },
-    { lat: 31.2304, lng: 121.4737 },
-    { lat: 23.1291, lng: 113.2644 }
-  ],
+  CN: [{ lat: 39.9042, lng: 116.4074 }, { lat: 31.2304, lng: 121.4737 }],
   JP: [{ lat: 35.6895, lng: 139.6917 }],
-  KR: [{ lat: 37.5665, lng: 126.978 }],
-  TW: [{ lat: 25.033, lng: 121.5654 }],
-  HK: [{ lat: 22.3193, lng: 114.1694 }]
+  KR: [{ lat: 37.5665, lng: 126.978 }]
 };
 
-// 姓名数据（简化版，够用）
 const namesByCountry = {
   US: { first: ["Smith", "Johnson"], last: ["James", "Michael"] },
   CN: { first: ["Li", "Wang"], last: ["Wei", "Ming"] },
   JP: { first: ["Sato"], last: ["Hiroto"] },
-  KR: { first: ["Kim"], last: ["Minjun"] },
-  UK: { first: ["Brown"], last: ["Oliver"] },
-  FR: { first: ["Martin"], last: ["Lucas"] },
-  DE: { first: ["Schmidt"], last: ["Ben"] }
+  KR: { first: ["Kim"], last: ["Minjun"] }
 };
 
-// 电话格式
 const phoneFormats = {
   US: "+1 (XXX) XXX-XXXX",
   CN: "+86 1XX-XXXX-XXXX",
@@ -38,9 +23,7 @@ const phoneFormats = {
 
 // ================== 工具函数 ==================
 
-function random(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+const random = arr => arr[Math.floor(Math.random() * arr.length)];
 
 function getRandomLocation(country) {
   const base = random(countryCoordinates[country]);
@@ -56,7 +39,7 @@ function getRandomName(country) {
 }
 
 function getRandomPhone(country) {
-  let format = phoneFormats[country] || phoneFormats.US;
+  const format = phoneFormats[country] || phoneFormats.US;
   return format.replace(/X/g, () => Math.floor(Math.random() * 10));
 }
 
@@ -64,7 +47,7 @@ function isValidAddress(d) {
   return d?.address?.road && (d.address.city || d.address.town);
 }
 
-// ================== HTML 页面 ==================
+// ================== HTML ==================
 
 const html = `<!doctype html>
 <html lang="zh">
@@ -92,7 +75,7 @@ async function load(){
 </body>
 </html>`;
 
-// ================== 主逻辑 ==================
+// ================== 主处理 ==================
 
 async function handleRequest(request) {
   const url = new URL(request.url);
@@ -125,12 +108,12 @@ async function handleRequest(request) {
       }
     }
 
-    return json({ error: "Failed" }, 500);
+    return json({ error: "Failed to generate address" }, 500);
   }
 
-  // HTML
+  // 页面
   return new Response(html, {
-    headers: { "content-type": "text/html;charset=utf-8" }
+    headers: { "content-type": "text/html; charset=utf-8" }
   });
 }
 
