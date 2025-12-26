@@ -1,7 +1,4 @@
-export const config = { runtime: "edge" };
-
-export default function handler() {
-  return new Response(`<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
@@ -9,6 +6,7 @@ export default function handler() {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
 
   <div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-xl">
@@ -55,7 +53,4 @@ async function load(){
 </script>
 
 </body>
-</html>`, {
-    headers: { "content-type": "text/html; charset=utf-8" }
-  });
-}
+</html>
