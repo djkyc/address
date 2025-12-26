@@ -84,4 +84,70 @@ pre{background:#fff;padding:16px;border-radius:8px}
 <pre id="out">点击生成</pre>
 <script>
 async function load(){
-  cons
+  const r = await fetch('/api?country=US');
+  document.getElementById('out').textContent =
+    JSON.stringify(await r.json(),null,2);
+}
+</script>
+</body>
+</html>`;
+
+// ================== 主逻辑 ==================
+
+async function handleRequest(request) {
+  const url = new URL(request.url);
+
+  // API
+  if (url.pathname === "/api") {
+    const country = url.searchParams.get("country") || "US";
+
+    if (!countryCoordinates[country]) {
+      return json({ error: "Invalid country" }, 400);
+    }
+
+    for (let i = 0; i < 10; i++) {
+      const loc = getRandomLocation(country);
+      const api = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${loc.lat}&lon=${loc.lng}&zoom=18&addressdetails=1`;
+
+      const r = await fetch(api, {
+        headers: { "User-Agent": "Vercel-Edge" }
+      });
+
+      const d = await r.json();
+      if (isValidAddress(d)) {
+        return json({
+          name: getRandomName(country),
+          gender: Math.random() > 0.5 ? "Male" : "Female",
+          phone: getRandomPhone(country),
+          address: `${d.address.road}, ${d.address.city || d.address.town}`,
+          coordinates: loc
+        });
+      }
+    }
+
+    return json({ error: "Failed" }, 500);
+  }
+
+  // HTML
+  return new Response(html, {
+    headers: { "content-type": "text/html;charset=utf-8" }
+  });
+}
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "content-type": "application/json",
+      "access-control-allow-origin": "*"
+    }
+  });
+}
+
+// ================== Vercel Edge 导出 ==================
+
+export const config = {
+  runtime: "edge"
+};
+
+export default handleRequest;
