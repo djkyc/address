@@ -1,56 +1,48 @@
-export const config = {
-  runtime: "edge"
+export const config = { runtime: "edge" };
+
+const data = {
+  US: {
+    names: [["Smith","James"],["Johnson","Michael"]],
+    phones: "+1 (XXX) XXX-XXXX",
+    addresses: ["New York","Los Angeles","San Francisco"]
+  },
+  CN: {
+    names: [["Li","Wei"],["Wang","Ming"]],
+    phones: "+86 1XX-XXXX-XXXX",
+    addresses: ["北京","上海","广州"]
+  },
+  JP: {
+    names: [["Sato","Hiroto"],["Suzuki","Ren"]],
+    phones: "+81 90-XXXX-XXXX",
+    addresses: ["东京","大阪"]
+  },
+  KR: {
+    names: [["Kim","Minjun"],["Lee","Jihun"]],
+    phones: "+82 10-XXXX-XXXX",
+    addresses: ["首尔","釜山"]
+  }
 };
 
-const html = `<!doctype html>
-<html lang="zh">
-<head>
-<meta charset="utf-8" />
-<title>随机地址生成器</title>
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<style>
-body{font-family:system-ui;padding:40px;background:#f5f7fb}
-button{padding:10px 16px;font-size:16px}
-pre{background:#fff;padding:16px;border-radius:8px}
-</style>
-</head>
-<body>
-<h1>随机地址生成器</h1>
-<button onclick="load()">生成地址</button>
-<pre id="out">点击生成</pre>
-<script>
-async function load(){
-  const r = await fetch('/api?country=US');
-  document.getElementById('out').textContent =
-    JSON.stringify(await r.json(),null,2);
-}
-</script>
-</body>
-</html>`;
+const rand = a => a[Math.floor(Math.random()*a.length)];
 
-export default async function handler(request) {
-  const url = new URL(request.url);
+export default function handler(req) {
+  const url = new URL(req.url);
+  const country = url.searchParams.get("country") || "US";
+  const c = data[country] || data.US;
 
-  // 首页
-  if (url.pathname === "/") {
-    return new Response(html, {
-      headers: { "content-type": "text/html; charset=utf-8" }
-    });
-  }
+  const [last, first] = rand(c.names);
+  const phone = c.phones.replace(/X/g,()=>Math.floor(Math.random()*10));
 
-  // API
-  if (url.pathname === "/api") {
-    return new Response(JSON.stringify({
-      ok: true,
-      msg: "API works",
-      country: url.searchParams.get("country") || "US"
-    }), {
-      headers: {
-        "content-type": "application/json",
-        "access-control-allow-origin": "*"
-      }
-    });
-  }
-
-  return new Response("Not Found", { status: 404 });
+  return new Response(JSON.stringify({
+    name: `${last} ${first}`,
+    gender: Math.random() > 0.5 ? "Male" : "Female",
+    phone,
+    address: rand(c.addresses),
+    country
+  }), {
+    headers: {
+      "content-type":"application/json",
+      "access-control-allow-origin":"*"
+    }
+  });
 }
